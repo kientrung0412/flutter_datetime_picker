@@ -31,6 +31,7 @@ class DatePicker {
     locale: LocaleType.en,
     DateTime? currentTime,
     DatePickerTheme? theme,
+    String title = '',
   }) async {
     return await Navigator.push(
       context,
@@ -40,6 +41,7 @@ class DatePicker {
         onConfirm: onConfirm,
         onCancel: onCancel,
         locale: locale,
+        title: title,
         theme: theme,
         barrierLabel:
             MaterialLocalizations.of(context).modalBarrierDismissLabel,
@@ -167,6 +169,7 @@ class DatePicker {
     locale: LocaleType.en,
     BasePickerModel? pickerModel,
     DatePickerTheme? theme,
+    String title = '',
   }) async {
     return await Navigator.push(
       context,
@@ -180,6 +183,7 @@ class DatePicker {
         barrierLabel:
             MaterialLocalizations.of(context).modalBarrierDismissLabel,
         pickerModel: pickerModel,
+        title: title,
       ),
     );
   }
@@ -191,6 +195,7 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
     this.onChanged,
     this.onConfirm,
     this.onCancel,
+    this.title = '',
     DatePickerTheme? theme,
     this.barrierLabel,
     this.locale,
@@ -207,6 +212,7 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
   final LocaleType? locale;
   final DatePickerTheme theme;
   final BasePickerModel pickerModel;
+  final String title;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 200);
@@ -234,16 +240,39 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation) {
     Widget bottomSheet = MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      child: _DatePickerComponent(
-        onChanged: onChanged,
-        locale: this.locale,
-        route: this,
-        pickerModel: pickerModel,
-      ),
-    );
+        context: context,
+        removeTop: true,
+        child: DataDatetimePicker(
+          child: _DatePickerComponent(
+            onChanged: onChanged,
+            locale: this.locale,
+            route: this,
+            pickerModel: pickerModel,
+          ),
+          title: title,
+        ));
     return InheritedTheme.captureAll(context, bottomSheet);
+  }
+}
+
+class DataDatetimePicker extends InheritedWidget {
+  final String title;
+
+  DataDatetimePicker({
+    required Widget child,
+    required this.title,
+  }) : super(child: child);
+
+  static DataDatetimePicker of(BuildContext context) {
+    final DataDatetimePicker? result =
+        context.dependOnInheritedWidgetOfExactType<DataDatetimePicker>();
+    assert(result != null, 'No FrogColor found in context');
+    return result!;
+  }
+
+  @override
+  bool updateShouldNotify(covariant DataDatetimePicker oldWidget) {
+    return oldWidget.title != title;
   }
 }
 
@@ -481,15 +510,16 @@ class _DatePickerState extends State<_DatePickerComponent> {
         color: theme.headerColor ?? theme.backgroundColor,
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
           Container(
             height: theme.titleHeight,
             child: CupertinoButton(
               pressedOpacity: 0.3,
               padding: EdgeInsetsDirectional.only(start: 16, top: 0),
               child: Text(
-                '$cancel',
+                cancel,
                 style: theme.cancelStyle,
               ),
               onPressed: () {
@@ -500,13 +530,25 @@ class _DatePickerState extends State<_DatePickerComponent> {
               },
             ),
           ),
+          Expanded(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  DataDatetimePicker.of(context).title,
+                  style: theme.titleStyle,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
           Container(
             height: theme.titleHeight,
             child: CupertinoButton(
               pressedOpacity: 0.3,
-              padding: EdgeInsetsDirectional.only(end: 16, top: 0),
+              padding: const EdgeInsetsDirectional.only(end: 16, top: 0),
               child: Text(
-                '$done',
+                done,
                 style: theme.doneStyle,
               ),
               onPressed: () {
