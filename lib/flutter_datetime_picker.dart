@@ -170,6 +170,8 @@ class DatePicker {
     BasePickerModel? pickerModel,
     DatePickerTheme? theme,
     String title = '',
+    String? rightTitle,
+    String? leftTitle,
   }) async {
     return await Navigator.push(
       context,
@@ -184,6 +186,8 @@ class DatePicker {
             MaterialLocalizations.of(context).modalBarrierDismissLabel,
         pickerModel: pickerModel,
         title: title,
+        rightTitle: rightTitle,
+        leftTitle: leftTitle,
       ),
     );
   }
@@ -201,6 +205,8 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
     this.locale,
     RouteSettings? settings,
     BasePickerModel? pickerModel,
+    this.rightTitle,
+    this.leftTitle,
   })  : this.pickerModel = pickerModel ?? DatePickerModel(),
         this.theme = theme ?? DatePickerTheme(),
         super(settings: settings);
@@ -213,6 +219,8 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
   final DatePickerTheme theme;
   final BasePickerModel pickerModel;
   final String title;
+  final String? rightTitle;
+  final String? leftTitle;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 200);
@@ -250,6 +258,8 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
             pickerModel: pickerModel,
           ),
           title: title,
+          leftTitle: leftTitle,
+          rightTitle: rightTitle,
         ));
     return InheritedTheme.captureAll(context, bottomSheet);
   }
@@ -257,10 +267,14 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
 
 class DataDatetimePicker extends InheritedWidget {
   final String title;
+  final String? rightTitle;
+  final String? leftTitle;
 
   DataDatetimePicker({
     required Widget child,
     required this.title,
+    this.rightTitle,
+    this.leftTitle,
   }) : super(child: child);
 
   static DataDatetimePicker of(BuildContext context) {
@@ -501,8 +515,8 @@ class _DatePickerState extends State<_DatePickerComponent> {
 
   // Title View
   Widget _renderTitleActionsView(DatePickerTheme theme) {
-    final done = _localeDone();
-    final cancel = _localeCancel();
+    final done = DataDatetimePicker.of(context).rightTitle ?? _localeDone();
+    final cancel = DataDatetimePicker.of(context).leftTitle ?? _localeCancel();
 
     return Container(
       height: theme.titleHeight,
